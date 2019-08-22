@@ -6,15 +6,15 @@ import '../widgets/circle.dart';
 import '../widgets/input_text.dart';
 import '../api/account.dart';
 
-class LoginPage extends StatefulWidget {
+class SignUpPage extends StatefulWidget {
   @override
-  _LoginPageState createState() => _LoginPageState();
+  _SignUpPageState createState() => _SignUpPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _SignUpPageState extends State<SignUpPage> {
   final _formKey = GlobalKey<FormState>();
 
-  String _email = '', _password = '';
+  String _name = '', _email = '', _password = '';
 
   @override
   void initState() {
@@ -25,15 +25,19 @@ class _LoginPageState extends State<LoginPage> {
 
   _submit() async {
     final isValid = _formKey.currentState.validate();
-
     if (isValid) {
-      final result = await AccountApi.login(email: _email, password: _password);
-      if (result != null) {
-        Navigator.pushNamed(context, "home");
-      } else {
-        print("Login incorrecto");
-      }
+     final result= await AccountApi.register(
+          name: _name, email: _email, password: _password);
+     if(result!=null){
+       Navigator.pushNamed(context, "home");
+     }else{
+       print("registro fallido");
+     }
     }
+  }
+
+  _goBack() {
+    Navigator.pop(context);
   }
 
   @override
@@ -51,7 +55,7 @@ class _LoginPageState extends State<LoginPage> {
           child: Stack(
             children: <Widget>[
               Positioned(
-                top: -size.width * 0.25,
+                top: -size.width * 0.2,
                 right: -size.width * 0.15,
                 child: Circle(radius: size.width * 0.4, colors: [
                   Colors.pink,
@@ -59,7 +63,7 @@ class _LoginPageState extends State<LoginPage> {
                 ]),
               ),
               Positioned(
-                top: -size.width * 0.25,
+                top: -size.width * 0.2,
                 left: -size.width * 0.1,
                 child: Circle(
                     radius: size.width * 0.3,
@@ -72,10 +76,17 @@ class _LoginPageState extends State<LoginPage> {
                   child: SafeArea(
                       child: Column(
                     children: <Widget>[
+                      SizedBox(height: size.height * 0.03),
+                      Text(
+                        "Hello!\nSign up to get started.",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                            fontSize: 22, height: 1.2, color: Colors.white),
+                      ),
                       Container(
-                        width: 100,
-                        height: 100,
-                        margin: EdgeInsets.only(top: size.height * 0.13),
+                        width: 120,
+                        height: 120,
+                        margin: EdgeInsets.only(top: 50),
                         child: Center(
                           child: SvgPicture.asset(
                             'assets/icons/hi.svg',
@@ -85,45 +96,54 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                         decoration: BoxDecoration(
                             color: Colors.white,
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius: BorderRadius.circular(60),
                             boxShadow: [
                               BoxShadow(color: Colors.black12, blurRadius: 30)
                             ]),
                       ),
                       SizedBox(height: 30),
-                      Text(
-                        "Hello again. \n Welcome back.",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                            fontSize: 22,
-                            height: 1.2,
-                            color: Color(0xff161F3D)),
-                      ),
-                      SizedBox(height: 90),
+                      SizedBox(height: 30),
                       Form(
                           key: _formKey,
                           child: Column(
                             children: <Widget>[
                               InputText(
+                                label: "FULL NAME",
+                                keyboardType: TextInputType.emailAddress,
+                                validator: (text) {
+                                  if (text.isEmpty) return "Ingrese un nombre";
+
+                                  final exp = RegExp(r'^[A-Za-z ]+$');
+                                  if (exp.hasMatch(text)) {
+                                    this._name = text;
+                                    return null;
+                                  }
+                                  return "Ingrese solo letras";
+                                },
+                              ),
+                              SizedBox(
+                                height: 25,
+                              ),
+                              InputText(
                                 label: "EMAIL ADDRESS",
                                 keyboardType: TextInputType.emailAddress,
                                 validator: (text) {
                                   if (text.contains("@")) {
-                                    _email = text;
+                                    this._email = text;
                                     return null;
                                   }
                                   return "Ingrese un email valido";
                                 },
                               ),
                               SizedBox(
-                                height: 30,
+                                height: 25,
                               ),
                               InputText(
                                 label: "PASSWORD",
                                 isSecure: true,
                                 validator: (text) {
                                   if (text.length > 5) {
-                                    _password = text;
+                                    this._password = text;
                                     return null;
                                   }
                                   return "Ingrese una contraseña valida";
@@ -137,7 +157,7 @@ class _LoginPageState extends State<LoginPage> {
                         child: CupertinoButton(
                           borderRadius: BorderRadius.circular(5),
                           child: Text(
-                            "Sign in",
+                            "Sign Up",
                             style: TextStyle(fontSize: 20),
                           ),
                           onPressed: _submit,
@@ -149,25 +169,40 @@ class _LoginPageState extends State<LoginPage> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
                           Text(
-                            "New to Friendly Desi?",
+                            "Already have an account?",
                             textAlign: TextAlign.center,
                             style:
                                 TextStyle(fontSize: 15, color: Colors.black54),
                           ),
                           CupertinoButton(
                             child: Text(
-                              "Sign Up",
+                              "Sign In",
                               style: TextStyle(color: Colors.pinkAccent),
                             ),
-                            onPressed: () {
-                              Navigator.pushNamed(context, "signUp");
-                            },
+                            onPressed: _goBack,
                           )
                         ],
                       )
                     ],
                   )),
                 ),
+              ),
+              Positioned(
+                top: 0,
+                left: 15,
+                child: SafeArea(
+                    child: Container(
+                  margin: EdgeInsets.only(top: 10),
+                  child: CupertinoButton(
+                      padding: EdgeInsets.all(4),
+                      borderRadius: BorderRadius.circular(30),
+                      color: Colors.black12,
+                      child: Icon(
+                        Icons.arrow_back,
+                        color: Colors.white,
+                      ),
+                      onPressed: _goBack),
+                )),
               )
             ],
           ),
